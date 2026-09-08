@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SwingRank — Live Swing Trading Scanner</title>
+  <meta name="description" content="Real-time swing trading scanner that ranks stocks and ETFs using composite momentum, RS, volume, and technical scores." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- ── HEADER ────────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">SwingRank</span>
+      <span class="logo-tag">LIVE</span>
+    </div>
+
+    <div class="header-controls">
+      <div class="ticker-input-wrap">
+        <input
+          id="ticker-input"
+          class="ticker-input"
+          type="text"
+          placeholder="AAPL, NVDA, TSLA …"
+          title="Comma-separated tickers"
+        />
+        <button id="scan-btn" class="btn-scan">
+          <span class="btn-icon">⚡</span>Scan
+        </button>
+      </div>
+
+      <div class="sort-wrap">
+        <label class="sort-label">Sort by</label>
+        <select id="sort-select" class="sort-select">
+          <option value="composite">Composite Score</option>
+          <option value="momentum_20d">20D Momentum</option>
+          <option value="momentum_50d">50D Momentum</option>
+          <option value="rs_vs_spy">RS vs SPY</option>
+          <option value="volume">Volume</option>
+          <option value="ma_structure">MA Structure</option>
+          <option value="rsi">RSI</option>
+        </select>
+      </div>
+
+      <div id="last-updated" class="last-updated">—</div>
+    </div>
+  </div>
+</header>
+
+<!-- ── MARKET PULSE BAR ──────────────────────────────────── -->
+<div class="pulse-bar">
+  <div class="pulse-inner" id="pulse-bar">
+    <span class="pulse-loading">Fetching live data…</span>
+  </div>
+</div>
+
+<!-- ── MAIN ──────────────────────────────────────────────── -->
+<main class="main-grid">
+
+  <!-- Left panel: rankings list -->
+  <section class="rankings-panel" id="rankings-panel">
+    <div class="panel-header">
+      <h1 class="panel-title">Rankings</h1>
+      <span class="panel-count" id="panel-count">—</span>
+    </div>
+
+    <div id="ranking-list" class="ranking-list">
+      <!-- Cards injected by JS -->
+      <div class="skeleton-list">
+        <div class="skeleton-card" style="--d:0"></div>
+        <div class="skeleton-card" style="--d:1"></div>
+        <div class="skeleton-card" style="--d:2"></div>
+        <div class="skeleton-card" style="--d:3"></div>
+        <div class="skeleton-card" style="--d:4"></div>
+        <div class="skeleton-card" style="--d:5"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Right panel: detail view -->
+  <section class="detail-panel" id="detail-panel">
+    <div class="detail-placeholder" id="detail-placeholder">
+      <div class="placeholder-icon">📊</div>
+      <p>Select a ticker to view its full breakdown</p>
+    </div>
+
+    <div class="detail-content hidden" id="detail-content">
+      <!-- Populated by JS -->
+    </div>
+  </section>
+
+</main>
+
+<!-- ── LOADING OVERLAY ───────────────────────────────────── -->
+<div class="loading-overlay hidden" id="loading-overlay">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <p class="loading-text">Fetching live market data…</p>
+    <p class="loading-sub">Calculating swing scores for <span id="loading-count">—</span> tickers</p>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
