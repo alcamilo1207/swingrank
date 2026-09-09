@@ -328,6 +328,83 @@ async function renderDetail(d) {
     <!-- Score grid -->
     <div class="score-grid">${scoreCards}</div>
 
+    <!-- ── TRADING POSITION SIGNALS SECTION ── -->
+    <div class="signal-section">
+      <div class="signal-header">
+        <div class="signal-title-wrap">
+          <span class="signal-icon">🎯</span>
+          <span class="signal-title">Trading Position Signals</span>
+        </div>
+        <div class="signal-badge ${d.signals ? d.signals.signal_status.toLowerCase() : 'no_signal'}">
+          ${d.signals ? d.signals.signal_badge : '⚪ NO SIGNAL'}
+        </div>
+      </div>
+
+      <div class="signal-cards-grid">
+        <!-- Trend Filter Box -->
+        <div class="signal-box ${d.signals && d.signals.trend_filter_passed ? 'passed' : 'failed'}">
+          <div class="signal-box-header">
+            <span class="sb-title">1. Trend Filter</span>
+            <span class="sb-status">${d.signals && d.signals.trend_filter_passed ? '✅ PASSED' : '❌ NOT MET'}</span>
+          </div>
+
+          <div class="signal-check-list">
+            <div class="signal-check ${d.signals && d.signals.cond_rank_le_10 ? 'check-met' : 'check-unmet'}">
+              <span class="check-icon">${d.signals && d.signals.cond_rank_le_10 ? '✓' : '✗'}</span>
+              <span class="check-formula">\( \text{Rank} \le 10 \)</span>
+              <span class="check-val">Rank #${d.rank} (${d.signals && d.signals.cond_rank_le_10 ? '≤ 10' : '> 10'})</span>
+            </div>
+
+            <div class="signal-check ${d.signals && d.signals.cond_price_gt_sma50 ? 'check-met' : 'check-unmet'}">
+              <span class="check-icon">${d.signals && d.signals.cond_price_gt_sma50 ? '✓' : '✗'}</span>
+              <span class="check-formula">\( \text{Price} > \text{SMA}_{50} \)</span>
+              <span class="check-val">$${d.price} vs $${d.sma50}</span>
+            </div>
+
+            <div class="signal-check ${d.signals && d.signals.cond_sma50_gt_sma200 ? 'check-met' : 'check-unmet'}">
+              <span class="check-icon">${d.signals && d.signals.cond_sma50_gt_sma200 ? '✓' : '✗'}</span>
+              <span class="check-formula">\( \text{SMA}_{50} > \text{SMA}_{200} \)</span>
+              <span class="check-val">$${d.sma50} vs $${d.sma200}</span>
+            </div>
+
+            <div class="signal-check ${d.signals && d.signals.cond_momentum20d_gt_0 ? 'check-met' : 'check-unmet'}">
+              <span class="check-icon">${d.signals && d.signals.cond_momentum20d_gt_0 ? '✓' : '✗'}</span>
+              <span class="check-formula">\( \text{Mom}_{20D} > 0 \)</span>
+              <span class="check-val">${d.change_pct_20d >= 0 ? '+' : ''}${d.change_pct_20d}%</span>
+            </div>
+
+            <div class="signal-check ${d.signals && d.signals.cond_momentum50d_gt_0 ? 'check-met' : 'check-unmet'}">
+              <span class="check-icon">${d.signals && d.signals.cond_momentum50d_gt_0 ? '✓' : '✗'}</span>
+              <span class="check-formula">\( \text{Mom}_{50D} > 0 \)</span>
+              <span class="check-val">${d.change_pct_50d >= 0 ? '+' : ''}${d.change_pct_50d}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pullback and Confirmation Box -->
+        <div class="signal-box ${d.signals && d.signals.cond_pullback ? 'passed' : 'failed'}">
+          <div class="signal-box-header">
+            <span class="sb-title">2. Pullback & Confirmation</span>
+            <span class="sb-status">${d.signals && d.signals.cond_pullback ? '✅ ACTIVE' : '⏳ WAITING'}</span>
+          </div>
+
+          <div class="signal-check-list">
+            <div class="signal-check ${d.signals && d.signals.cond_pullback ? 'check-met' : 'check-unmet'}">
+              <span class="check-icon">${d.signals && d.signals.cond_pullback ? '✓' : '⌛'}</span>
+              <span class="check-formula">\( \text{Pullback: } \text{Low}_t \le \text{SMA}_{20,t} \)</span>
+              <span class="check-val">Low $${d.low_t} vs SMA20 $${d.sma20}</span>
+            </div>
+
+            <div class="signal-check ${d.signals && d.signals.cond_confirmation ? 'check-met' : 'check-unmet'}">
+              <span class="check-icon">${d.signals && d.signals.cond_confirmation ? '✓' : '⌛'}</span>
+              <span class="check-formula">\( \text{Confirmation: } \text{Low}_t \le \text{SMA}_{20,t} \)</span>
+              <span class="check-val">Low $${d.low_t} vs SMA20 $${d.sma20}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Factor breakdown -->
     <div class="breakdown-wrap">
       <div class="breakdown-header">Factor Breakdown</div>
@@ -338,6 +415,16 @@ async function renderDetail(d) {
       </div>
     </div>
   `;
+
+  if (window.renderMathInElement) {
+    renderMathInElement($('#detail-content'), {
+      delimiters: [
+        {left: '\\(', right: '\\)', display: false},
+        {left: '\\[', right: '\\]', display: true}
+      ],
+      throwOnError: false
+    });
+  }
 
   // Render Chart.js line chart for sparkline
   if (sparkChartRef) { sparkChartRef.destroy(); sparkChartRef = null; }

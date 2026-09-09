@@ -171,10 +171,10 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
     # Always include SPY for regime + RS computation
     symbols = list(dict.fromkeys(["SPY"] + tickers))
 
-    # Download 6 months of daily OHLCV in one shot
+    # Download 2 years of daily OHLCV in one shot
     raw = yf.download(
         symbols,
-        period="6mo",
+        period="2y",
         interval="1d",
         auto_adjust=True,
         progress=False,
@@ -183,7 +183,10 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
 
     # Market regime from SPY
     try:
-        spy_closes = raw["SPY"]["Close"].dropna().values
+        if isinstance(raw.columns, pd.MultiIndex):
+            spy_closes = raw["SPY"]["Close"].dropna().values.astype(float)
+        else:
+            spy_closes = raw["Close"].dropna().values.astype(float)
         spy_pct_20d = float(
             (spy_closes[-1] - spy_closes[-21]) / spy_closes[-21] * 100
         ) if len(spy_closes) > 21 else 0.0
@@ -196,7 +199,11 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
 
     for ticker in tickers:
         try:
-            df = raw[ticker].dropna()
+            if isinstance(raw.columns, pd.MultiIndex):
+                df = raw[ticker].dropna()
+            else:
+                df = raw.dropna()
+
             if len(df) < 55:
                 continue
 
@@ -205,9 +212,21 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
             lows   = df["Low"].values.astype(float)
             vols   = df["Volume"].values.astype(float)
 
+            price = round(float(closes[-1]), 2)
+            low_t = round(float(lows[-1]), 2)
+            high_t = round(float(highs[-1]), 2)
+
             ticker_pct_20d = float(
                 (closes[-1] - closes[-21]) / closes[-21] * 100
             ) if len(closes) > 21 else 0.0
+
+            ticker_pct_50d = float(
+                (closes[-1] - closes[-51]) / closes[-51] * 100
+            ) if len(closes) > 51 else 0.0
+
+            sma20 = round(float(closes[-20:].mean()), 2) if len(closes) >= 20 else 0.0
+            sma50 = round(float(closes[-50:].mean()), 2) if len(closes) >= 50 else 0.0
+            sma200 = round(float(closes[-200:].mean()), 2) if len(closes) >= 200 else 0.0
 
             atr_val  = atr(highs, lows, closes)
             rsi_val  = rsi(closes)
@@ -235,9 +254,15 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
 
             results.append({
                 "ticker":        ticker,
-                "price":         round(float(closes[-1]), 2),
+                "price":         price,
+                "low_t":         low_t,
+                "high_t":        high_t,
+                "sma20":         sma20,
+                "sma50":         sma50,
+                "sma200":        sma200,
                 "change_pct_1d": round(float((closes[-1] - closes[-2]) / closes[-2] * 100), 2),
                 "change_pct_20d":round(ticker_pct_20d, 2),
+                "change_pct_50d":round(ticker_pct_50d, 2),
                 "rsi_raw":       round(rsi_val, 1),
                 "atr_pct":       round(atr_val / closes[-1] * 100, 2),
                 "composite":     composite,
@@ -249,7 +274,53 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
             print(f"[WARN] {ticker}: {e}")
             continue
 
+    # Sort by composite score descending
     results.sort(key=lambda x: x["composite"], reverse=True)
+
+    # Assign rank and evaluate trading signals
+    for idx, item in enumerate(results, start=1):
+        item["rank"] = idx
+
+        cond_rank_le_10 = idx <= 10
+        cond_price_gt_sma50 = item["price"] > item["sma50"] if item["sma50"] > 0 else False
+        cond_sma50_gt_sma200 = item["sma50"] > item["sma200"] if (item["sma50"] > 0 and item["sma200"] > 0) else False
+        cond_momentum20d_gt_0 = item["change_pct_20d"] > 0
+        cond_momentum50d_gt_0 = item["change_pct_50d"] > 0
+
+        trend_filter_passed = (
+            cond_rank_le_10 and
+            cond_price_gt_sma50 and
+            cond_sma50_gt_sma200 and
+            cond_momentum20d_gt_0 and
+            cond_momentum50d_gt_0
+        )
+
+        cond_pullback = item["low_t"] <= item["sma20"] if item["sma20"] > 0 else False
+        cond_confirmation = item["low_t"] <= item["sma20"] if item["sma20"] > 0 else False
+
+        if trend_filter_passed and cond_pullback and cond_confirmation:
+            signal_status = "BUY_SIGNAL"
+            signal_badge = "🟢 LONG BUY SIGNAL READY"
+        elif trend_filter_passed:
+            signal_status = "QUALIFIED"
+            signal_badge = "🔵 TREND QUALIFIED (WAITING PULLBACK)"
+        else:
+            signal_status = "NO_SIGNAL"
+            signal_badge = "⚪ NO TRADE SIGNAL"
+
+        item["signals"] = {
+            "trend_filter_passed": trend_filter_passed,
+            "cond_rank_le_10": cond_rank_le_10,
+            "cond_price_gt_sma50": cond_price_gt_sma50,
+            "cond_sma50_gt_sma200": cond_sma50_gt_sma200,
+            "cond_momentum20d_gt_0": cond_momentum20d_gt_0,
+            "cond_momentum50d_gt_0": cond_momentum50d_gt_0,
+            "cond_pullback": cond_pullback,
+            "cond_confirmation": cond_confirmation,
+            "signal_status": signal_status,
+            "signal_badge": signal_badge,
+        }
+
     return results
 
 

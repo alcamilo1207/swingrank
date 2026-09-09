@@ -792,7 +792,7 @@ body {
 }
 .score-card:hover { border-color: var(--border-hi); }
 .score-card::before {
-  content: '';
+  /*content: '';*/
   position: absolute;
   bottom: 0; left: 0; right: 0;
   height: 3px;
@@ -983,8 +983,153 @@ body {
   color: var(--text-2);
 }
 
-/* ═══ UTILITIES ══════════════════════════════════════════════ */
-.hidden { display: none !important; }
+/* ═══ SIGNAL SECTION (DETAIL PANEL) ═════════════════════════ */
+.signal-section {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.signal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.signal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.signal-icon { font-size: 18px; }
+.signal-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.signal-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--border);
+}
+.signal-badge.buy_signal {
+  color: var(--green);
+  background: var(--green-dim);
+  border-color: rgba(34,211,160,0.4);
+  box-shadow: 0 0 12px rgba(34,211,160,0.15);
+}
+.signal-badge.qualified {
+  color: var(--accent);
+  background: var(--accent-glow);
+  border-color: rgba(79,142,247,0.4);
+}
+.signal-badge.no_signal {
+  color: var(--text-3);
+  background: var(--bg-4);
+}
+
+.signal-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 700px) {
+  .signal-cards-grid { grid-template-columns: 1fr; }
+}
+
+.signal-box {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+.signal-box.passed {
+  border-color: rgba(34,211,160,0.3);
+}
+.signal-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+.sb-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.sb-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.signal-box.passed .sb-status { color: var(--green); }
+.signal-box.failed .sb-status { color: var(--text-3); }
+
+.signal-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.signal-check {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--bg-4);
+  font-size: 12px;
+  transition: background 0.15s;
+}
+.signal-check.check-met {
+  background: rgba(34,211,160,0.08);
+  border-left: 3px solid var(--green);
+}
+.signal-check.check-unmet {
+  background: var(--bg-4);
+  border-left: 3px solid var(--text-3);
+}
+
+.check-icon {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 13px;
+  width: 16px;
+}
+.signal-check.check-met .check-icon { color: var(--green); }
+.signal-check.check-unmet .check-icon { color: var(--text-3); }
+
+.check-formula {
+  font-family: var(--font-mono);
+  color: var(--text-2);
+  flex: 1;
+}
+
+.check-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
 
 /* ═══ RESPONSIVE ════════════════════════════════════════════ */
 @media (max-width: 900px) {
