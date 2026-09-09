@@ -535,43 +535,6 @@ function renderSignals(d) {
   }
 }
 
-    type: 'line',
-    data: {
-      labels: d.sparkline.map((_, i) => `-${d.sparkline.length - 1 - i}d`),
-      datasets: [{
-        data: d.sparkline,
-        borderColor: color,
-        backgroundColor: color + '20',
-        borderWidth: 2,
-        pointRadius: 0,
-        fill: true,
-        tension: 0.35,
-      }],
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false }, tooltip: {
-        mode: 'index',
-        intersect: false,
-        backgroundColor: '#131929',
-        borderColor: '#1a2236',
-        borderWidth: 1,
-        titleColor: '#8b9bbf',
-        bodyColor: color,
-        callbacks: {
-          label: (ctx) => `  Normalised: ${ctx.parsed.y.toFixed(1)}`,
-        },
-      }},
-      scales: {
-        x: { grid: { color: '#1a2236' }, ticks: { color: '#4d5d80', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, maxTicksLimit: 6 } },
-        y: { grid: { color: '#1a2236' }, ticks: { color: '#4d5d80', font: { family: 'JetBrains Mono', size: 10 } }, min: 0, max: 100 },
-      },
-      interaction: { mode: 'index', intersect: false },
-      animation: { duration: 600, easing: 'easeInOutQuart' },
-    },
-  });
-}
-
 // ─── Sort ─────────────────────────────────────────────────────────────────────
 function sortedData(data, key) {
   const copy = [...data];
