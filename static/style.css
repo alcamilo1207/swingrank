@@ -952,7 +952,8 @@ body {
   align-items: center;
   justify-content: center;
 }
-.loading-overlay.hidden { display: none; }
+.loading-overlay.hidden { display: none !important; }
+.hidden { display: none !important; }
 
 .loading-box {
   background: var(--bg-2);
@@ -1118,6 +1119,8 @@ body {
   flex-direction: column;
   gap: 16px;
 }
+.signal-placeholder.hidden { display: none !important; }
+.signal-content.hidden { display: none !important; }
 
 /* ═══ RESPONSIVE ════════════════════════════════════════════ */
 @media (max-width: 900px) {
