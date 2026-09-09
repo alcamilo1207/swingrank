@@ -7,16 +7,56 @@
 const API_BASE   = '';          // same-origin
 const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 min
 
-// Factor display metadata
+// Factor display metadata & scoring explanations
 const FACTORS = [
-  { key: 'momentum_20d',  label: '20D Momentum',  weight: '15%' },
-  { key: 'momentum_50d',  label: '50D Momentum',  weight: '15%' },
-  { key: 'rs_vs_spy',     label: 'RS vs SPY',     weight: '20%' },
-  { key: 'volume',        label: 'Volume Surge',  weight: '10%' },
-  { key: 'atr',           label: 'ATR Quality',   weight: '10%' },
-  { key: 'ma_structure',  label: 'MA Structure',  weight: '15%' },
-  { key: 'rsi',           label: 'RSI',           weight: '10%' },
-  { key: 'market_regime', label: 'Market Regime', weight: '5%'  },
+  {
+    key: 'momentum_20d',
+    label: '20D Momentum',
+    weight: '15%',
+    desc: 'Short-term price performance over 20 trading days. Normalized from -30% (score 0) to +30% (score 100).'
+  },
+  {
+    key: 'momentum_50d',
+    label: '50D Momentum',
+    weight: '15%',
+    desc: 'Medium-term trend strength over 50 trading days. Normalized from -30% (score 0) to +30% (score 100).'
+  },
+  {
+    key: 'rs_vs_spy',
+    label: 'RS vs SPY',
+    weight: '20%',
+    desc: 'Relative Strength vs S&P 500 ETF (SPY). Measures how much 20-day return outperformed SPY.'
+  },
+  {
+    key: 'volume',
+    label: 'Volume Surge',
+    weight: '10%',
+    desc: 'Current daily volume compared to its 20-day average. Scores higher on volume expansion (1.5x+ avg).'
+  },
+  {
+    key: 'atr',
+    label: 'ATR Quality',
+    weight: '10%',
+    desc: 'Average True Range as % of price. Bell-curve score peaking at 2.5% ATR—the sweet spot for swing trading.'
+  },
+  {
+    key: 'ma_structure',
+    label: 'MA Structure',
+    weight: '15%',
+    desc: 'Bullish moving average alignment: Price > SMA10 > SMA20 > SMA50. 25 pts awarded per satisfied layer.'
+  },
+  {
+    key: 'rsi',
+    label: 'RSI',
+    weight: '10%',
+    desc: '14-period RSI normalized to reward optimal momentum (peaks at RSI ~55, penalizes overbought >80 or oversold <30).'
+  },
+  {
+    key: 'market_regime',
+    label: 'Market Regime',
+    weight: '5%',
+    desc: "S&P 500 health benchmark. Scores SPY's position relative to its 50-day moving average."
+  },
 ];
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -260,13 +300,22 @@ async function renderDetail(d) {
   const chgClass = d.change_pct_1d >= 0 ? 'pos' : 'neg';
   const color    = scoreColor(d.composite);
 
-  // Build factor rows HTML
+  // Build factor rows HTML with info icon popups
   const factorRows = FACTORS.map(f => {
     const val = d.scores[f.key] ?? 0;
     const c   = scoreColor(val);
     return `
       <div class="breakdown-row">
-        <span class="br-name">${f.label}</span>
+        <div class="br-name-wrap">
+          <span class="br-name">${f.label}</span>
+          <span class="tooltip-trigger" tabindex="0">
+            <span class="info-icon">i</span>
+            <div class="tooltip-bubble">
+              <div class="tb-header">${f.label} (${f.weight})</div>
+              <div class="tb-desc">${f.desc}</div>
+            </div>
+          </span>
+        </div>
         <div class="br-bar-wrap">
           <div class="br-bar" style="width:${val}%; background:${c};"></div>
         </div>
