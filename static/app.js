@@ -446,18 +446,18 @@ async function renderDetail(d) {
             <div class="formula-status">${d.signals && d.signals.cond_pullback ? '✅ TRUE (TOUCHED 20MA)' : '⏳ FALSE'}</div>
           </div>
 
-          <!-- Confirmation: Low_t <= SMA20_t -->
+          <!-- Confirmation: Close_t > High_{t-1} -->
           <div class="sentiment-card formula-card ${d.signals && d.signals.cond_confirmation ? 'met' : 'unmet'}">
             <div class="formula-header">
               <span class="formula-tag bull-tag">Confirmation Condition</span>
-              <span class="formula-math">\\( Low_t \\le SMA_{20,t} \\)</span>
+              <span class="formula-math">\\( Close_t > High_{t-1} \\)</span>
             </div>
             <div class="formula-values">
-              <span class="val-left">Low $${d.low_t}</span>
-              <span class="val-op">&le;</span>
-              <span class="val-right">SMA20 $${d.sma20}</span>
+              <span class="val-left">Close $${d.price}</span>
+              <span class="val-op">&gt;</span>
+              <span class="val-right">High(t-1) $${d.high_prev}</span>
             </div>
-            <div class="formula-status">${d.signals && d.signals.cond_confirmation ? '✅ TRUE (CONFIRMED)' : '⏳ FALSE'}</div>
+            <div class="formula-status">${d.signals && d.signals.cond_confirmation ? '✅ TRUE (BREAKOUT CONFIRMED)' : '⏳ FALSE'}</div>
           </div>
         </div>
       </div>

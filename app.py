@@ -215,6 +215,7 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
             price = round(float(closes[-1]), 2)
             low_t = round(float(lows[-1]), 2)
             high_t = round(float(highs[-1]), 2)
+            high_prev = round(float(highs[-2]), 2) if len(highs) >= 2 else 0.0
 
             ticker_pct_20d = float(
                 (closes[-1] - closes[-21]) / closes[-21] * 100
@@ -257,6 +258,7 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
                 "price":         price,
                 "low_t":         low_t,
                 "high_t":        high_t,
+                "high_prev":     high_prev,
                 "sma20":         sma20,
                 "sma50":         sma50,
                 "sma200":        sma200,
@@ -296,14 +298,17 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
         )
 
         cond_pullback = item["low_t"] <= item["sma20"] if item["sma20"] > 0 else False
-        cond_confirmation = item["low_t"] <= item["sma20"] if item["sma20"] > 0 else False
+        cond_confirmation = item["price"] > item["high_prev"] if item["high_prev"] > 0 else False
 
         if trend_filter_passed and cond_pullback and cond_confirmation:
             signal_status = "BUY_SIGNAL"
             signal_badge = "🟢 LONG BUY SIGNAL READY"
+        elif trend_filter_passed and cond_pullback:
+            signal_status = "PULLBACK_ACTIVE"
+            signal_badge = "🟡 PULLBACK ACTIVE (WAITING CONFIRMATION)"
         elif trend_filter_passed:
             signal_status = "QUALIFIED"
-            signal_badge = "🔵 TREND QUALIFIED (WAITING PULLBACK)"
+            signal_badge = "🔵 TREND QUALIFIED"
         else:
             signal_status = "NO_SIGNAL"
             signal_badge = "⚪ NO TRADE SIGNAL"
