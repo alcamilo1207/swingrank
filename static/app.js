@@ -246,6 +246,7 @@ function selectCard(idx) {
   }
 
   renderDetail(allData[idx]);
+  renderSignals(allData[idx]);
 }
 
 async function renderDetail(d) {
@@ -328,12 +329,71 @@ async function renderDetail(d) {
     <!-- Score grid -->
     <div class="score-grid">${scoreCards}</div>
 
+    <!-- Factor breakdown -->
+    <div class="breakdown-wrap">
+      <div class="breakdown-header">Factor Breakdown</div>
+      ${factorRows}
+      <div class="composite-row">
+        <span class="composite-row-label">Composite Score</span>
+        <span class="composite-row-val">${d.composite}</span>
+      </div>
+    </div>
+  `;
+
+  // Render Chart.js line chart for sparkline
+  if (sparkChartRef) { sparkChartRef.destroy(); sparkChartRef = null; }
+  const canvas = $('#detail-chart');
+  sparkChartRef = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: d.sparkline.map((_, i) => `-${d.sparkline.length - 1 - i}d`),
+      datasets: [{
+        data: d.sparkline,
+        borderColor: color,
+        backgroundColor: color + '20',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+        tension: 0.35,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: '#131929',
+        borderColor: '#1a2236',
+        borderWidth: 1,
+        titleColor: '#8b9bbf',
+        bodyColor: color,
+        callbacks: {
+          label: (ctx) => `  Normalised: ${ctx.parsed.y.toFixed(1)}`,
+        },
+      }},
+      scales: {
+        x: { grid: { color: '#1a2236' }, ticks: { color: '#4d5d80', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, maxTicksLimit: 6 } },
+        y: { grid: { color: '#1a2236' }, ticks: { color: '#4d5d80', font: { family: 'JetBrains Mono', size: 10 } }, min: 0, max: 100 },
+      },
+      interaction: { mode: 'index', intersect: false },
+      animation: { duration: 600, easing: 'easeInOutQuart' },
+    },
+  });
+}
+
+function renderSignals(d) {
+  const placeholder = $('#signal-placeholder');
+  const content     = $('#signal-content');
+  if (placeholder) placeholder.classList.add('hidden');
+  if (content) content.classList.remove('hidden');
+
+  content.innerHTML = `
     <!-- ── TRADING POSITION SIGNALS SECTION ── -->
     <div class="signal-section">
       <div class="signal-header">
         <div class="signal-title-wrap">
           <span class="signal-icon">🎯</span>
-          <span class="signal-title">Trading Position Signals</span>
+          <span class="signal-title">Trading Position Signals — ${d.ticker}</span>
         </div>
         <div class="signal-badge ${d.signals ? d.signals.signal_status.toLowerCase() : 'no_signal'}">
           ${d.signals ? d.signals.signal_badge : '⚪ NO SIGNAL'}
@@ -462,20 +522,10 @@ async function renderDetail(d) {
         </div>
       </div>
     </div>
-
-    <!-- Factor breakdown -->
-    <div class="breakdown-wrap">
-      <div class="breakdown-header">Factor Breakdown</div>
-      ${factorRows}
-      <div class="composite-row">
-        <span class="composite-row-label">Composite Score</span>
-        <span class="composite-row-val">${d.composite}</span>
-      </div>
-    </div>
   `;
 
   if (window.renderMathInElement) {
-    renderMathInElement($('#detail-content'), {
+    renderMathInElement($('#signal-content'), {
       delimiters: [
         {left: '\\(', right: '\\)', display: false},
         {left: '\\[', right: '\\]', display: true}
@@ -483,11 +533,8 @@ async function renderDetail(d) {
       throwOnError: false
     });
   }
+}
 
-  // Render Chart.js line chart for sparkline
-  if (sparkChartRef) { sparkChartRef.destroy(); sparkChartRef = null; }
-  const canvas = $('#detail-chart');
-  sparkChartRef = new Chart(canvas, {
     type: 'line',
     data: {
       labels: d.sparkline.map((_, i) => `-${d.sparkline.length - 1 - i}d`),

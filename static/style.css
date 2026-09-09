@@ -478,11 +478,11 @@ body {
 .main-grid {
   display: grid;
   grid-template-columns: 420px 1fr;
-  height: calc(100vh - var(--header-h) - var(--pulse-h) - 142px);
-  min-height: 480px;
+  min-height: calc(100vh - var(--header-h) - var(--pulse-h) - 142px);
   max-width: 1600px;
   margin: 0 auto;
   gap: 0;
+  align-items: start;
 }
 
 /* ═══ RANKINGS PANEL ═════════════════════════════════════════ */
@@ -490,6 +490,9 @@ body {
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: calc(var(--header-h) + var(--pulse-h));
+  max-height: calc(100vh - var(--header-h) - var(--pulse-h));
   overflow: hidden;
 }
 
@@ -675,7 +678,6 @@ body {
 
 /* ═══ DETAIL PANEL ═══════════════════════════════════════════ */
 .detail-panel {
-  overflow-y: auto;
   padding: 24px;
   display: flex;
   flex-direction: column;
@@ -1081,8 +1083,40 @@ body {
   .signal-grid-5 { grid-template-columns: repeat(2, 1fr); }
   .signal-grid-2 { grid-template-columns: 1fr; }
 }
-@media (max-width: 550px) {
-  .signal-grid-5 { grid-template-columns: 1fr; }
+/* ═══ SIGNALS PAGE SECTION (END OF PAGE) ═════════════════════ */
+.signals-page-section {
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  padding: 28px 24px 40px;
+}
+.signals-page-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.signal-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 36px 20px;
+  color: var(--text-3);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-3);
+}
+.signal-placeholder .placeholder-icon {
+  font-size: 36px;
+  opacity: 0.4;
+}
+.signal-placeholder p {
+  font-size: 13px;
+}
+.signal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* ═══ RESPONSIVE ════════════════════════════════════════════ */
