@@ -340,66 +340,124 @@ async function renderDetail(d) {
         </div>
       </div>
 
-      <div class="signal-cards-grid">
-        <!-- Trend Filter Box -->
-        <div class="signal-box ${d.signals && d.signals.trend_filter_passed ? 'passed' : 'failed'}">
-          <div class="signal-box-header">
-            <span class="sb-title">1. Trend Filter</span>
-            <span class="sb-status">${d.signals && d.signals.trend_filter_passed ? '✅ PASSED' : '❌ NOT MET'}</span>
-          </div>
-
-          <div class="signal-check-list">
-            <div class="signal-check ${d.signals && d.signals.cond_rank_le_10 ? 'check-met' : 'check-unmet'}">
-              <span class="check-icon">${d.signals && d.signals.cond_rank_le_10 ? '✓' : '✗'}</span>
-              <span class="check-formula">\( \text{Rank} \le 10 \)</span>
-              <span class="check-val">Rank #${d.rank} (${d.signals && d.signals.cond_rank_le_10 ? '≤ 10' : '> 10'})</span>
-            </div>
-
-            <div class="signal-check ${d.signals && d.signals.cond_price_gt_sma50 ? 'check-met' : 'check-unmet'}">
-              <span class="check-icon">${d.signals && d.signals.cond_price_gt_sma50 ? '✓' : '✗'}</span>
-              <span class="check-formula">\( \text{Price} > \text{SMA}_{50} \)</span>
-              <span class="check-val">$${d.price} vs $${d.sma50}</span>
-            </div>
-
-            <div class="signal-check ${d.signals && d.signals.cond_sma50_gt_sma200 ? 'check-met' : 'check-unmet'}">
-              <span class="check-icon">${d.signals && d.signals.cond_sma50_gt_sma200 ? '✓' : '✗'}</span>
-              <span class="check-formula">\( \text{SMA}_{50} > \text{SMA}_{200} \)</span>
-              <span class="check-val">$${d.sma50} vs $${d.sma200}</span>
-            </div>
-
-            <div class="signal-check ${d.signals && d.signals.cond_momentum20d_gt_0 ? 'check-met' : 'check-unmet'}">
-              <span class="check-icon">${d.signals && d.signals.cond_momentum20d_gt_0 ? '✓' : '✗'}</span>
-              <span class="check-formula">\( \text{Mom}_{20D} > 0 \)</span>
-              <span class="check-val">${d.change_pct_20d >= 0 ? '+' : ''}${d.change_pct_20d}%</span>
-            </div>
-
-            <div class="signal-check ${d.signals && d.signals.cond_momentum50d_gt_0 ? 'check-met' : 'check-unmet'}">
-              <span class="check-icon">${d.signals && d.signals.cond_momentum50d_gt_0 ? '✓' : '✗'}</span>
-              <span class="check-formula">\( \text{Mom}_{50D} > 0 \)</span>
-              <span class="check-val">${d.change_pct_50d >= 0 ? '+' : ''}${d.change_pct_50d}%</span>
-            </div>
-          </div>
+      <!-- Trend Filter Sub-Section -->
+      <div class="signal-group">
+        <div class="signal-group-header">
+          <span class="sg-title">1. Trend Filter Conditions</span>
+          <span class="sg-status ${d.signals && d.signals.trend_filter_passed ? 'passed' : 'failed'}">
+            ${d.signals && d.signals.trend_filter_passed ? '✅ ALL 5 CONDITIONS MET' : '❌ TREND FILTER NOT MET'}
+          </span>
         </div>
 
-        <!-- Pullback and Confirmation Box -->
-        <div class="signal-box ${d.signals && d.signals.cond_pullback ? 'passed' : 'failed'}">
-          <div class="signal-box-header">
-            <span class="sb-title">2. Pullback & Confirmation</span>
-            <span class="sb-status">${d.signals && d.signals.cond_pullback ? '✅ ACTIVE' : '⏳ WAITING'}</span>
+        <div class="signal-grid-5">
+          <!-- Check 1: Rank <= 10 -->
+          <div class="sentiment-card formula-card ${d.signals && d.signals.cond_rank_le_10 ? 'met' : 'unmet'}">
+            <div class="formula-header">
+              <span class="formula-tag bull-tag">Rank Check</span>
+              <span class="formula-math">\\( Rank \\le 10 \\)</span>
+            </div>
+            <div class="formula-values">
+              <span class="val-left">Rank #${d.rank}</span>
+              <span class="val-op">${d.rank <= 10 ? '≤' : '>'}</span>
+              <span class="val-right">10</span>
+            </div>
+            <div class="formula-status">${d.signals && d.signals.cond_rank_le_10 ? '✅ TRUE' : '❌ FALSE'}</div>
           </div>
 
-          <div class="signal-check-list">
-            <div class="signal-check ${d.signals && d.signals.cond_pullback ? 'check-met' : 'check-unmet'}">
-              <span class="check-icon">${d.signals && d.signals.cond_pullback ? '✓' : '⌛'}</span>
-              <span class="check-formula">\( \text{Pullback: } \text{Low}_t \le \text{SMA}_{20,t} \)</span>
-              <span class="check-val">Low $${d.low_t} vs SMA20 $${d.sma20}</span>
+          <!-- Check 2: Price > SMA50 -->
+          <div class="sentiment-card formula-card ${d.signals && d.signals.cond_price_gt_sma50 ? 'met' : 'unmet'}">
+            <div class="formula-header">
+              <span class="formula-tag bull-tag">Price vs SMA50</span>
+              <span class="formula-math">\\( Price > SMA_{50} \\)</span>
             </div>
+            <div class="formula-values">
+              <span class="val-left">$${d.price}</span>
+              <span class="val-op">&gt;</span>
+              <span class="val-right">$${d.sma50}</span>
+            </div>
+            <div class="formula-status">${d.signals && d.signals.cond_price_gt_sma50 ? '✅ TRUE' : '❌ FALSE'}</div>
+          </div>
 
-            <div class="signal-check ${d.signals && d.signals.cond_confirmation ? 'check-met' : 'check-unmet'}">
-              <span class="check-icon">${d.signals && d.signals.cond_confirmation ? '✓' : '⌛'}</span>
-              <span class="check-formula">\( \text{Confirmation: } \text{Low}_t \le \text{SMA}_{20,t} \)</span>
-              <span class="check-val">Low $${d.low_t} vs SMA20 $${d.sma20}</span>
+          <!-- Check 3: SMA50 > SMA200 -->
+          <div class="sentiment-card formula-card ${d.signals && d.signals.cond_sma50_gt_sma200 ? 'met' : 'unmet'}">
+            <div class="formula-header">
+              <span class="formula-tag bull-tag">Golden Alignment</span>
+              <span class="formula-math">\\( SMA_{50} > SMA_{200} \\)</span>
             </div>
+            <div class="formula-values">
+              <span class="val-left">$${d.sma50}</span>
+              <span class="val-op">&gt;</span>
+              <span class="val-right">$${d.sma200}</span>
+            </div>
+            <div class="formula-status">${d.signals && d.signals.cond_sma50_gt_sma200 ? '✅ TRUE' : '❌ FALSE'}</div>
+          </div>
+
+          <!-- Check 4: 20D Momentum > 0 -->
+          <div class="sentiment-card formula-card ${d.signals && d.signals.cond_momentum20d_gt_0 ? 'met' : 'unmet'}">
+            <div class="formula-header">
+              <span class="formula-tag bull-tag">20D Momentum</span>
+              <span class="formula-math">\\( Mom_{20D} > 0 \\)</span>
+            </div>
+            <div class="formula-values">
+              <span class="val-left">${d.change_pct_20d >= 0 ? '+' : ''}${d.change_pct_20d}%</span>
+              <span class="val-op">&gt;</span>
+              <span class="val-right">0%</span>
+            </div>
+            <div class="formula-status">${d.signals && d.signals.cond_momentum20d_gt_0 ? '✅ TRUE' : '❌ FALSE'}</div>
+          </div>
+
+          <!-- Check 5: 50D Momentum > 0 -->
+          <div class="sentiment-card formula-card ${d.signals && d.signals.cond_momentum50d_gt_0 ? 'met' : 'unmet'}">
+            <div class="formula-header">
+              <span class="formula-tag bull-tag">50D Momentum</span>
+              <span class="formula-math">\\( Mom_{50D} > 0 \\)</span>
+            </div>
+            <div class="formula-values">
+              <span class="val-left">${d.change_pct_50d >= 0 ? '+' : ''}${d.change_pct_50d}%</span>
+              <span class="val-op">&gt;</span>
+              <span class="val-right">0%</span>
+            </div>
+            <div class="formula-status">${d.signals && d.signals.cond_momentum50d_gt_0 ? '✅ TRUE' : '❌ FALSE'}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pullback & Confirmation Sub-Section -->
+      <div class="signal-group">
+        <div class="signal-group-header">
+          <span class="sg-title">2. Pullback & Confirmation</span>
+          <span class="sg-status ${d.signals && d.signals.cond_pullback ? 'passed' : 'failed'}">
+            ${d.signals && d.signals.cond_pullback ? '✅ PULLBACK ACTIVE' : '⏳ AWAITING PULLBACK'}
+          </span>
+        </div>
+
+        <div class="signal-grid-2">
+          <!-- Pullback: Low_t <= SMA20_t -->
+          <div class="sentiment-card formula-card ${d.signals && d.signals.cond_pullback ? 'met' : 'unmet'}">
+            <div class="formula-header">
+              <span class="formula-tag bull-tag">Pullback Condition</span>
+              <span class="formula-math">\\( Low_t \\le SMA_{20,t} \\)</span>
+            </div>
+            <div class="formula-values">
+              <span class="val-left">Low $${d.low_t}</span>
+              <span class="val-op">&le;</span>
+              <span class="val-right">SMA20 $${d.sma20}</span>
+            </div>
+            <div class="formula-status">${d.signals && d.signals.cond_pullback ? '✅ TRUE (TOUCHED 20MA)' : '⏳ FALSE'}</div>
+          </div>
+
+          <!-- Confirmation: Low_t <= SMA20_t -->
+          <div class="sentiment-card formula-card ${d.signals && d.signals.cond_confirmation ? 'met' : 'unmet'}">
+            <div class="formula-header">
+              <span class="formula-tag bull-tag">Confirmation Condition</span>
+              <span class="formula-math">\\( Low_t \\le SMA_{20,t} \\)</span>
+            </div>
+            <div class="formula-values">
+              <span class="val-left">Low $${d.low_t}</span>
+              <span class="val-op">&le;</span>
+              <span class="val-right">SMA20 $${d.sma20}</span>
+            </div>
+            <div class="formula-status">${d.signals && d.signals.cond_confirmation ? '✅ TRUE (CONFIRMED)' : '⏳ FALSE'}</div>
           </div>
         </div>
       </div>
