@@ -65,17 +65,92 @@ async function fetchRankings(tickers = '') {
   return json.data;
 }
 
-// ─── Render pulse bar ─────────────────────────────────────────────────────────
+async function fetchSentiment() {
+  const res = await fetch(`${API_BASE}/api/sentiment`);
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || 'Sentiment API error');
+  return json.data;
+}
+
+function renderSentiment(d) {
+  // Regime badge
+  const badge = $('#sentiment-regime-badge');
+  badge.className = `regime-badge ${d.regime.toLowerCase()}`;
+  badge.innerHTML = `<span class="badge-text">${d.regime_title}</span>`;
+
+  // Overview metrics
+  $('#spy-close-price').textContent = `$${d.spy_close.toFixed(2)}`;
+  const spyChgEl = $('#spy-price-chg');
+  spyChgEl.textContent = fmtChg(d.change_pct_1d);
+  spyChgEl.className = `sc-chg ${d.change_pct_1d >= 0 ? 'pos' : 'neg'}`;
+  $('#spy-sma-50').textContent = `$${d.sma_50.toFixed(2)}`;
+  $('#spy-sma-200').textContent = `$${d.sma_200.toFixed(2)}`;
+
+  // Bull Condition 1: SPY_close > SMA_200
+  const c1Card = $('#card-cond-bull1');
+  const c1Met = d.cond_close_gt_sma200;
+  c1Card.className = `sentiment-card formula-card ${c1Met ? 'met' : 'unmet'}`;
+  $('#val-cond-bull1').innerHTML = `
+    <span class="val-left">$${d.spy_close.toFixed(2)}</span>
+    <span class="val-op">&gt;</span>
+    <span class="val-right">$${d.sma_200.toFixed(2)}</span>
+  `;
+  $('#status-cond-bull1').innerHTML = c1Met ? '✅ TRUE' : '❌ FALSE';
+
+  // Bull Condition 2: SMA_50 > SMA_200
+  const c2Card = $('#card-cond-bull2');
+  const c2Met = d.cond_sma50_gt_sma200;
+  c2Card.className = `sentiment-card formula-card ${c2Met ? 'met' : 'unmet'}`;
+  $('#val-cond-bull2').innerHTML = `
+    <span class="val-left">$${d.sma_50.toFixed(2)}</span>
+    <span class="val-op">&gt;</span>
+    <span class="val-right">$${d.sma_200.toFixed(2)}</span>
+  `;
+  $('#status-cond-bull2').innerHTML = c2Met ? '✅ TRUE' : '❌ FALSE';
+
+  // Bear Condition: SPY_close < SMA_200
+  const c3Card = $('#card-cond-bear');
+  const c3Met = d.cond_close_lt_sma200;
+  c3Card.className = `sentiment-card formula-card ${c3Met ? 'met' : 'unmet'}`;
+  $('#val-cond-bear').innerHTML = `
+    <span class="val-left">$${d.spy_close.toFixed(2)}</span>
+    <span class="val-op">&lt;</span>
+    <span class="val-right">$${d.sma_200.toFixed(2)}</span>
+  `;
+  $('#status-cond-bear').innerHTML = c3Met ? '🔴 TRUE (BEAR)' : '⚪ FALSE';
+
+  // If KaTeX loaded, render KaTeX formulas inside sentiment-section
+  if (window.renderMathInElement) {
+    renderMathInElement($('#sentiment-section'), {
+      delimiters: [
+        {left: '\\(', right: '\\)', display: false},
+        {left: '\\[', right: '\\]', display: true}
+      ],
+      throwOnError: false
+    });
+  }
+}
+
+// ─── Render pulse bar (scrolling ticker tape) ─────────────────────────────────
 function renderPulse(data) {
   const bar = $('#pulse-bar');
-  bar.innerHTML = data.slice(0, 12).map((d, i) => `
+
+  // Build one set of items (use all tickers)
+  const itemsHTML = data.map((d) => `
     <div class="pulse-item">
       <span class="pulse-ticker">${d.ticker}</span>
       <span class="pulse-price">$${d.price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
       <span class="pulse-chg ${d.change_pct_1d >= 0 ? 'pos' : 'neg'}">${fmtChg(d.change_pct_1d)}</span>
     </div>
-    ${i < 11 ? '<span class="pulse-sep">·</span>' : ''}
+    <span class="pulse-sep">·</span>
   `).join('');
+
+  // Duplicate for a seamless infinite loop (CSS animates -50%)
+  bar.innerHTML = itemsHTML + itemsHTML;
+
+  // Scale duration to number of items (~3.5s per ticker)
+  const duration = data.length * 3.5;
+  bar.style.setProperty('--ticker-duration', `${duration}s`);
 }
 
 // ─── Draw mini sparkline (canvas 2D) ─────────────────────────────────────────
@@ -328,11 +403,22 @@ async function load(customTickers = '') {
   $('#loading-count').textContent = tickerList ? tickerList.length : '~25';
 
   try {
-    const raw  = await fetchRankings(customTickers);
-    allData    = sortedData(raw, sortKey);
+    const [raw, sentimentData] = await Promise.all([
+      fetchRankings(customTickers),
+      fetchSentiment().catch(err => {
+        console.warn('Sentiment fetch failed:', err);
+        return null;
+      })
+    ]);
+
+    allData = sortedData(raw, sortKey);
 
     renderPulse(allData);
     renderCards(allData);
+    if (sentimentData) {
+      renderSentiment(sentimentData);
+    }
+
     $('#last-updated').textContent = `Updated ${now()}`;
 
     // If a card was active before, re-select it by ticker

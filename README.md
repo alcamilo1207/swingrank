@@ -6,10 +6,13 @@ A real-time swing trading scanner that ranks stocks and ETFs using a composite s
 
 ## Features
 
-- 📈 **Live data** via Yahoo Finance (no API key needed)
-- 🏆 **Composite scoring** across 8 swing-trading factors
-- 🔍 **Custom universe** — scan any tickers you want
-- 📊 **Detail view** with 20-day price chart and full breakdown
+- 🌐 **Global Market Sentiment Section**: Evaluates S&P 500 (SPY proxy) moving average regime conditions:
+  - 🟢 **Bull Regime**: $$ SPY_{close} > SMA_{200} $$ AND $$ SMA_{50} > SMA_{200} $$
+  - 🔴 **Bear Regime**: $$ SPY_{close} < SMA_{200} $$
+- 🏆 **Ticker Rankings Panel**: Real-time composite scoring across 8 technical factors with infinite marquee ticker tape.
+- 📊 **Interactive Charts & Factor Breakdown**: Detailed 20-day price trend analysis and individual factor scores for any selected asset.
+- 📈 **Live data** via Yahoo Finance (no API key required)
+- 🔍 **Custom universe** — scan any tickers on demand
 - 🔄 **Auto-refresh** every 5 minutes
 
 ## Scoring Factors

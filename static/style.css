@@ -192,21 +192,36 @@ body {
 }
 
 /* ═══ PULSE BAR ══════════════════════════════════════════════ */
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 .pulse-bar {
   height: var(--pulse-h);
   background: var(--bg-2);
   border-bottom: 1px solid var(--border);
   overflow: hidden;
+  /* Fade edges */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0%, black 80px, black calc(100% - 80px), transparent 100%);
 }
+
+/* Scrolling track — JS doubles the content for seamless loop */
 .pulse-inner {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: 0;
   height: 100%;
-  padding: 0 24px;
-  overflow: hidden;
+  width: max-content;
+  animation: ticker-scroll var(--ticker-duration, 40s) linear infinite;
 }
+.pulse-bar:hover .pulse-inner {
+  animation-play-state: paused;
+}
+
 .pulse-loading {
+  padding: 0 24px;
   font-size: 12px;
   color: var(--text-3);
   font-style: italic;
@@ -217,6 +232,7 @@ body {
   gap: 8px;
   white-space: nowrap;
   flex-shrink: 0;
+  padding: 0 20px;
 }
 .pulse-ticker {
   font-family: var(--font-mono);
@@ -240,14 +256,230 @@ body {
 .pulse-chg.neg { color: var(--red);   background: var(--red-dim); }
 .pulse-sep {
   color: var(--border-hi);
+  font-size: 14px;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+.pulse-sep {
+  color: var(--border-hi);
   font-size: 18px;
+}
+
+/* ═══ SENTIMENT SECTION ══════════════════════════════════════ */
+.sentiment-section {
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+}
+.sentiment-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sentiment-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.sentiment-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sentiment-icon {
+  font-size: 16px;
+}
+.sentiment-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.sentiment-proxy-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-glow);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(79,142,247,0.3);
+}
+
+.regime-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  transition: all 0.3s ease;
+}
+.regime-badge.bull {
+  color: var(--green);
+  background: var(--green-dim);
+  border-color: rgba(34,211,160,0.4);
+  box-shadow: 0 0 12px rgba(34,211,160,0.15);
+}
+.regime-badge.bear {
+  color: var(--red);
+  background: var(--red-dim);
+  border-color: rgba(240,90,126,0.4);
+  box-shadow: 0 0 12px rgba(240,90,126,0.15);
+}
+.regime-badge.neutral {
+  color: var(--yellow);
+  background: var(--yellow-dim);
+  border-color: rgba(245,197,66,0.4);
+}
+.regime-badge.loading {
+  color: var(--text-2);
+}
+
+.sentiment-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.sentiment-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.sentiment-card:hover {
+  border-color: var(--border-hi);
+  transform: translateY(-1px);
+}
+
+/* Metric card */
+.sc-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-2);
+  letter-spacing: 0.4px;
+}
+.sc-card-value-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.sc-price {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+.sc-chg {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.sc-chg.pos { color: var(--green); background: var(--green-dim); }
+.sc-chg.neg { color: var(--red); background: var(--red-dim); }
+
+.sc-ma-pills {
+  display: flex;
+  gap: 8px;
+}
+.ma-pill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-2);
+  background: var(--bg-4);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.ma-pill strong {
+  color: var(--text);
+}
+
+/* Formula card */
+.formula-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.formula-tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.formula-tag.bull-tag { color: var(--green); }
+.formula-tag.bear-tag { color: var(--red); }
+
+.formula-math {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-2);
+  background: var(--bg-4);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.formula-values {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+}
+.val-op {
+  color: var(--accent);
+}
+
+.formula-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.formula-card.met {
+  border-color: rgba(34,211,160,0.35);
+  background: linear-gradient(180deg, var(--bg-3) 0%, rgba(34,211,160,0.05) 100%);
+}
+.formula-card.met .formula-status {
+  color: var(--green);
+}
+.formula-card.unmet {
+  border-color: rgba(240,90,126,0.35);
+  background: linear-gradient(180deg, var(--bg-3) 0%, rgba(240,90,126,0.05) 100%);
+}
+.formula-card.unmet .formula-status {
+  color: var(--red);
 }
 
 /* ═══ MAIN GRID ══════════════════════════════════════════════ */
 .main-grid {
   display: grid;
   grid-template-columns: 420px 1fr;
-  height: calc(100vh - var(--header-h) - var(--pulse-h));
+  height: calc(100vh - var(--header-h) - var(--pulse-h) - 142px);
+  min-height: 480px;
   max-width: 1600px;
   margin: 0 auto;
   gap: 0;

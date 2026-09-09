@@ -7,6 +7,9 @@
   <meta name="description" content="Real-time swing trading scanner that ranks stocks and ETFs using composite momentum, RS, volume, and technical scores." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -58,6 +61,79 @@
     <span class="pulse-loading">Fetching live data…</span>
   </div>
 </div>
+
+<!-- ── GLOBAL MARKET SENTIMENT SECTION ───────────────────── -->
+<section class="sentiment-section" id="sentiment-section">
+  <div class="sentiment-inner">
+    <div class="sentiment-header-row">
+      <div class="sentiment-title-wrap">
+        <span class="sentiment-icon">🌐</span>
+        <h2 class="sentiment-title">Global Market Sentiment</h2>
+        <span class="sentiment-proxy-tag">Proxy: SPY</span>
+      </div>
+      <div id="sentiment-regime-badge" class="regime-badge loading">
+        <span class="badge-text">Evaluating Market Regime…</span>
+      </div>
+    </div>
+
+    <div class="sentiment-cards-grid">
+      <!-- Card 1: SPY Price & MAs -->
+      <div class="sentiment-card metric-card">
+        <div class="sc-card-label">SPY Proxy Overview</div>
+        <div class="sc-card-value-group">
+          <span id="spy-close-price" class="sc-price">$—</span>
+          <span id="spy-price-chg" class="sc-chg">—</span>
+        </div>
+        <div class="sc-ma-pills">
+          <span class="ma-pill">SMA 50: <strong id="spy-sma-50">$—</strong></span>
+          <span class="ma-pill">SMA 200: <strong id="spy-sma-200">$—</strong></span>
+        </div>
+      </div>
+
+      <!-- Card 2: Bull Condition 1 -->
+      <div class="sentiment-card formula-card" id="card-cond-bull1">
+        <div class="formula-header">
+          <span class="formula-tag bull-tag">🟢 Bull Condition 1</span>
+          <span class="formula-math">\( SPY_{close} > SMA_{200} \)</span>
+        </div>
+        <div class="formula-values" id="val-cond-bull1">
+          <span class="val-left">$—</span>
+          <span class="val-op">&gt;</span>
+          <span class="val-right">$—</span>
+        </div>
+        <div class="formula-status" id="status-cond-bull1">—</div>
+      </div>
+
+      <!-- Card 3: Bull Condition 2 -->
+      <div class="sentiment-card formula-card" id="card-cond-bull2">
+        <div class="formula-header">
+          <span class="formula-tag bull-tag">🟢 Bull Condition 2</span>
+          <span class="formula-math">\( SMA_{50} > SMA_{200} \)</span>
+        </div>
+        <div class="formula-values" id="val-cond-bull2">
+          <span class="val-left">$—</span>
+          <span class="val-op">&gt;</span>
+          <span class="val-right">$—</span>
+        </div>
+        <div class="formula-status" id="status-cond-bull2">—</div>
+      </div>
+
+      <!-- Card 4: Bear Condition -->
+      <div class="sentiment-card formula-card" id="card-cond-bear">
+        <div class="formula-header">
+          <span class="formula-tag bear-tag">🔴 Bear Condition</span>
+          <span class="formula-math">\( SPY_{close} < SMA_{200} \)</span>
+        </div>
+        <div class="formula-values" id="val-cond-bear">
+          <span class="val-left">$—</span>
+          <span class="val-op">&lt;</span>
+          <span class="val-right">$—</span>
+        </div>
+        <div class="formula-status" id="status-cond-bear">—</div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ── MAIN ──────────────────────────────────────────────── -->
 <main class="main-grid">

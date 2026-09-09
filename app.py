@@ -6,6 +6,7 @@ on 8 swing-trading factors.
 
 import math
 import numpy as np
+import pandas as pd
 import yfinance as yf
 from flask import Flask, jsonify, render_template, request
 from flask_cors import CORS
@@ -252,11 +253,73 @@ def fetch_and_score(tickers: list[str]) -> list[dict]:
     return results
 
 
+def fetch_market_sentiment() -> dict:
+    """Fetch 2y of SPY daily data and calculate market regime metrics."""
+    try:
+        raw = yf.download("SPY", period="2y", interval="1d", auto_adjust=True, progress=False)
+        if isinstance(raw.columns, pd.MultiIndex):
+            closes = raw["Close"]["SPY"].dropna().values.astype(float)
+        elif "Close" in raw.columns:
+            closes = raw["Close"].dropna().values.flatten().astype(float)
+        else:
+            closes = raw.values.flatten().astype(float)
+
+        if len(closes) < 200:
+            return {"ok": False, "error": f"Insufficient SPY historical data (got {len(closes)} bars, need 200)"}
+
+        spy_close = float(closes[-1])
+        spy_prev = float(closes[-2])
+        change_pct_1d = float((spy_close - spy_prev) / spy_prev * 100)
+
+        sma_50 = float(closes[-50:].mean())
+        sma_200 = float(closes[-200:].mean())
+
+        cond_close_gt_sma200 = spy_close > sma_200
+        cond_sma50_gt_sma200 = sma_50 > sma_200
+        cond_close_lt_sma200 = spy_close < sma_200
+
+        if cond_close_gt_sma200 and cond_sma50_gt_sma200:
+            regime = "BULL"
+            regime_title = "🟢 BULL REGIME"
+            regime_desc = "Strong Uptrend: Price & 50D MA are both above 200D MA"
+        elif cond_close_lt_sma200:
+            regime = "BEAR"
+            regime_title = "🔴 BEAR REGIME"
+            regime_desc = "Downtrend Alert: SPY Price is below 200D MA"
+        else:
+            regime = "NEUTRAL"
+            regime_title = "🟡 NEUTRAL / CAUTION"
+            regime_desc = "Mixed Signals: Price above 200D MA but 50D MA lag"
+
+        return {
+            "ok": True,
+            "data": {
+                "spy_close": round(spy_close, 2),
+                "change_pct_1d": round(change_pct_1d, 2),
+                "sma_50": round(sma_50, 2),
+                "sma_200": round(sma_200, 2),
+                "cond_close_gt_sma200": cond_close_gt_sma200,
+                "cond_sma50_gt_sma200": cond_sma50_gt_sma200,
+                "cond_close_lt_sma200": cond_close_lt_sma200,
+                "regime": regime,
+                "regime_title": regime_title,
+                "regime_desc": regime_desc,
+            }
+        }
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 # ─── Routes ──────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/api/sentiment")
+def api_sentiment():
+    return jsonify(fetch_market_sentiment())
 
 
 @app.route("/api/ranks")
@@ -286,3 +349,4 @@ def api_detail(ticker: str):
 
 if __name__ == "__main__":
     app.run(debug=True, port=5050)
+
