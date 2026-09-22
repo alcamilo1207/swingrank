@@ -36,9 +36,3 @@ The separate market sentiment panel uses SPY and its 50- and 200-session average
 - No trade signal: the trend filter does not pass.
 
 Rank-based signals depend on the symbols included in the scan. Looking up a symbol alone can therefore produce a different signal from comparing it in a larger watchlist.
-
-## Data and limitations
-
-SwingRank uses adjusted daily price and volume data from Yahoo Finance through yfinance. Refreshing the page does not turn daily bars into a real-time price feed; data can be delayed, incomplete or unavailable. Symbols with fewer than 55 usable bars are omitted from rankings, and some calculations need longer histories.
-
-The chart normalizes the latest 20 closes to a 0-100 range. Its vertical axis does not show dollar prices. Scores and signals describe technical conditions; the app does not place trades or guarantee future returns.
