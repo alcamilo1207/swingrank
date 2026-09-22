@@ -1,38 +1,71 @@
 <h1 align="center">SwingRank</h1>
 
-SwingRank helps you compare stocks and ETFs for swing-trading research. It ranks a watchlist using eight technical factors and shows the trend, momentum and pullback conditions behind each result.
+<p align="center">
+  A real-time swing trading scanner that ranks stocks and ETFs using a composite score built from 8 technical factors
+</p>
 
-## Using SwingRank
+<p align="center">
+  Rankings refresh every five minutes using the latest available daily market data, rather than a tick-by-tick price feed.
+</p>
 
-1. Open the app to scan the default watchlist of 26 symbols.
-2. Enter comma-separated symbols, such as AAPL, NVDA, MSFT, and select Scan to compare your own watchlist. Each scan accepts up to 100 nonempty entries; repeated symbols are processed once.
-3. Sort the results by composite score or an individual factor.
-4. Select a symbol to see its normalized 20-session price chart, factor breakdown and trading-position signals.
+<p align="center">
+  <a href="https://swingrank-production-4d3e.up.railway.app/">Open SwingRank</a>
+</p>
 
-The app refreshes every five minutes while the page is open. An empty ticker field uses the default watchlist. Symbols are trimmed and converted to uppercase, with a limit of 32 characters each and 3,300 characters for the full input.
+---
 
-## Understanding the score
+![SwingRank showing the watchlist, MSTR price chart and eight factor scores](docs/swingrank-preview.png)
 
-Each factor produces a score from 0 to 100. The composite is their weighted sum; a higher value means a closer match to the app's scoring rules, not a probability of profit.
+<p align="center">
+  Live Railway deployment, captured September 21, 2026. The hosted preview is an earlier release; the guide below describes this repository.
+</p>
 
-| Factor | Weight | What it measures |
-| --- | --- | --- |
+## What it does
+
+SwingRank turns a watchlist into a ranked view of momentum, relative strength, volume and trend. Compare symbols, select one that interests you, and see which factors drive its score.
+
+- Compare stocks and ETFs in one ranked list.
+- Explore a normalized 20-session price chart and all eight factor scores.
+- Check SPY market conditions and the trend, pullback and confirmation rules.
+
+## Try a scan
+
+1. Open the app to load the default watchlist of 26 symbols.
+2. Enter your own symbols, separated by commas, and select Scan. For example: AAPL, NVDA, MSFT, TSLA.
+3. Select a result to explore its chart and factor breakdown. Use Sort by to focus on a particular factor.
+
+A custom scan accepts up to 100 entries. Repeated symbols count once in the results, and an empty field restores the default watchlist.
+
+## Understand the score
+
+The composite combines eight factor scores into a value from 0 to 100. A higher score means the symbol matches more of SwingRank's technical criteria. A score of 80 does not mean an 80% chance of profit.
+
+<details>
+<summary>See the eight factors and their weights</summary>
+
+| Factor | Weight | What it looks at |
+| --- | ---: | --- |
 | 20D Momentum | 15% | Price change over 20 trading sessions. |
 | 50D Momentum | 15% | Price change over 50 trading sessions. |
-| RS vs SPY | 20% | The symbol's 20-session return minus SPY's return. |
-| Volume Surge | 10% | Latest daily volume relative to the preceding 20 sessions. |
-| ATR Quality | 10% | Volatility as a percentage of price, with a scoring peak at 2.5%. |
-| MA Structure | 15% | Four comparisons between price and the 10-, 20- and 50-session moving averages. |
-| RSI | 10% | A smooth score centered on a 14-period RSI of 55. |
-| Market Regime | 5% | SPY's distance above or below its 50-session moving average. |
+| RS vs SPY | 20% | 20-session performance compared with SPY. |
+| Volume Surge | 10% | Latest volume versus the previous 20 sessions. |
+| ATR Quality | 10% | Volatility as a share of price, with a scoring peak at 2.5%. |
+| MA Structure | 15% | Alignment of price and short-term moving averages. |
+| RSI | 10% | Momentum balance, with a scoring peak at RSI 55. |
+| Market Regime | 5% | SPY's position relative to its 50-session average. |
 
-The separate market sentiment panel uses SPY and its 50- and 200-session averages to describe bullish, bearish or mixed conditions. It is a proxy based on SPY, not a survey of every market.
+</details>
 
-## Reading the signals
+## Read the signals
 
-- Trend qualified: the symbol ranks in the scan's top 10, its price is above its 50-session average, that average is above its 200-session average, and both momentum readings are positive.
-- Pullback active: the trend filter passes and the latest low touches or falls below the 20-session average.
-- Buy signal ready: the trend and pullback conditions pass, and the latest close exceeds the previous session's high.
+A symbol is trend qualified when it ranks in the scan's top 10, its price is above its 50-session average, that average is above its 200-session average, and both momentum readings are positive.
+
+- Pullback active: the trend filter passes and the latest low reaches the 20-session average or below.
+- Buy signal ready: the pullback conditions pass and the latest close exceeds the previous session's high.
 - No trade signal: the trend filter does not pass.
 
-Rank-based signals depend on the symbols included in the scan. Looking up a symbol alone can therefore produce a different signal from comparing it in a larger watchlist.
+Signals describe the app's rules, not trade execution. Since the top-10 condition depends on the watchlist, changing the symbols can change a signal.
+
+## License
+
+SwingRank is released under the [MIT License](LICENSE).
