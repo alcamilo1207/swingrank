@@ -8,11 +8,15 @@ import math
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+
+MAX_SCAN_ENTRIES = 100
+MAX_SYMBOL_LENGTH = 32
+MAX_SCAN_INPUT_LENGTH = 3300
 
 # ─── Default universe ────────────────────────────────────────────────────────
 DEFAULT_TICKERS = [
@@ -382,8 +386,9 @@ def fetch_market_sentiment() -> dict:
                 "regime_desc": regime_desc,
             }
         }
-    except Exception as e:
-        return {"ok": False, "error": str(e)}
+    except Exception:
+        app.logger.exception("Market sentiment fetch failed")
+        return {"ok": False, "error": "Unable to fetch market sentiment. Please try again later."}
 
 
 # ─── Routes ──────────────────────────────────────────────────────────────────
@@ -399,28 +404,42 @@ def api_sentiment():
 
 
 @app.route("/api/ranks")
-def api_ranks():
+def api_ranks() -> Response | tuple[Response, int]:
+    """Return rankings for a bounded, deduplicated list of symbols."""
     custom = request.args.get("tickers", "")
+    if len(custom) > MAX_SCAN_INPUT_LENGTH:
+        return jsonify({"ok": False, "error": "Ticker input must not exceed 3300 characters."}), 400
     if custom.strip():
         tickers = [t.strip().upper() for t in custom.split(",") if t.strip()]
+        if len(tickers) > MAX_SCAN_ENTRIES:
+            return jsonify({"ok": False, "error": "Use at most 100 ticker entries per scan."}), 400
+        if any(len(t) > MAX_SYMBOL_LENGTH for t in tickers):
+            return jsonify({"ok": False, "error": "Each ticker must not exceed 32 characters."}), 400
+        tickers = list(dict.fromkeys(tickers))
     else:
         tickers = [t for t in DEFAULT_TICKERS if t != "SPY"]
     try:
         data = fetch_and_score(tickers)
         return jsonify({"ok": True, "data": data})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Rankings fetch failed")
+        return jsonify({"ok": False, "error": "Unable to fetch rankings. Please try again later."}), 500
 
 
 @app.route("/api/detail/<ticker>")
-def api_detail(ticker: str):
+def api_detail(ticker: str) -> Response | tuple[Response, int]:
+    """Return one symbol's detail without exposing internal error messages."""
+    ticker = ticker.strip().upper()
+    if not ticker or len(ticker) > MAX_SYMBOL_LENGTH:
+        return jsonify({"ok": False, "error": "Use a ticker between 1 and 32 characters."}), 400
     try:
-        data = fetch_and_score([ticker.upper()])
+        data = fetch_and_score([ticker])
         if not data:
             return jsonify({"ok": False, "error": "No data"}), 404
         return jsonify({"ok": True, "data": data[0]})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)}), 500
+    except Exception:
+        app.logger.exception("Ticker detail fetch failed")
+        return jsonify({"ok": False, "error": "Unable to fetch ticker detail. Please try again later."}), 500
 
 
 if __name__ == "__main__":

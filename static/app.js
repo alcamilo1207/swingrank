@@ -69,6 +69,12 @@ let sparkChartRef = null;  // Chart.js instance for detail sparkline
 // ─── Utility helpers ──────────────────────────────────────────────────────────
 const $ = (sel) => document.querySelector(sel);
 
+function escapeHtml(value) {
+  const text = document.createElement('span');
+  text.textContent = String(value ?? '');
+  return text.innerHTML;
+}
+
 function scoreColor(v) {
   if (v >= 80) return '#22d3a0';
   if (v >= 60) return '#4f8ef7';
@@ -178,7 +184,7 @@ function renderPulse(data) {
   // Build one set of items (use all tickers)
   const itemsHTML = data.map((d) => `
     <div class="pulse-item">
-      <span class="pulse-ticker">${d.ticker}</span>
+      <span class="pulse-ticker">${escapeHtml(d.ticker)}</span>
       <span class="pulse-price">$${d.price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
       <span class="pulse-chg ${d.change_pct_1d >= 0 ? 'pos' : 'neg'}">${fmtChg(d.change_pct_1d)}</span>
     </div>
@@ -249,7 +255,7 @@ function renderCards(data) {
       <div class="rank-badge ${rankBadgeClass(i)}">${i + 1}</div>
       <div class="card-body">
         <div class="card-top">
-          <span class="card-ticker">${d.ticker}</span>
+          <span class="card-ticker">${escapeHtml(d.ticker)}</span>
           <span class="card-price">$${d.price.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
           <span class="card-chg ${chgClass}">${fmtChg(d.change_pct_1d)}</span>
         </div>
@@ -344,7 +350,7 @@ async function renderDetail(d) {
     <div class="d-header">
       <div>
         <div class="d-ticker-row">
-          <span class="d-ticker">${d.ticker}</span>
+          <span class="d-ticker">${escapeHtml(d.ticker)}</span>
           <span class="d-price">$${d.price.toLocaleString('en-US', {minimumFractionDigits:2})}</span>
           <span class="d-chg ${chgClass}">${fmtChg(d.change_pct_1d)}</span>
         </div>
@@ -442,7 +448,7 @@ function renderSignals(d) {
       <div class="signal-header">
         <div class="signal-title-wrap">
           <span class="signal-icon">🎯</span>
-          <span class="signal-title">Trading Position Signals — ${d.ticker}</span>
+          <span class="signal-title">Trading Position Signals — ${escapeHtml(d.ticker)}</span>
         </div>
         <div class="signal-badge ${d.signals ? d.signals.signal_status.toLowerCase() : 'no_signal'}">
           ${d.signals ? d.signals.signal_badge : '⚪ NO SIGNAL'}
@@ -635,7 +641,7 @@ async function load(customTickers = '') {
     console.error(err);
     $('#ranking-list').innerHTML = `
       <div style="padding:24px; color:#f05a7e; font-size:13px;">
-        ⚠ ${err.message || 'Failed to fetch data. Is the Flask server running?'}
+        ⚠ ${escapeHtml(err.message || 'Failed to fetch data. Is the Flask server running?')}
       </div>`;
   } finally {
     overlay.classList.add('hidden');
