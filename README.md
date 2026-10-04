@@ -65,7 +65,3 @@ A symbol is trend qualified when it ranks in the scan's top 10, its price is abo
 - No trade signal: the trend filter does not pass.
 
 Signals describe the app's rules, not trade execution. Since the top-10 condition depends on the watchlist, changing the symbols can change a signal.
-
-## License
-
-SwingRank is released under the [MIT License](LICENSE).
